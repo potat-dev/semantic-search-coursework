@@ -1,0 +1,13 @@
+version: '3'
+services:
+  crawler:
+    build: ./crawler
+    # Add necessary configuration for the crawler service
+
+  indexer:
+    build: ./indexer
+    # Add necessary configuration for the indexer service
+
+  search-engine:
+    build: ./search-engine
+    # Add necessary configuration for the search engine service
