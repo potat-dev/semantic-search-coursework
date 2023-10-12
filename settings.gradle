@@ -1,2 +1,5 @@
 rootProject.name = 'semantica'
 
+include 'crawler'
+include 'indexer'
+include 'api'
