@@ -62,7 +62,7 @@ public class KeywordsExtractor {
         LinkedHashMap<String, Float> result = new LinkedHashMap<>();
         for (Map.Entry<String, KeywordInfo> entry : keywords.entrySet()) {
             String keyword = entry.getKey();
-            Float weight = entry.getValue().balancedWeight();
+            float weight = entry.getValue().balancedWeight();
             if (weight >= minWeight) {
                 result.put(keyword, weight);
             }

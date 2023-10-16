@@ -1,19 +1,20 @@
 ### Gradle ###
-.gradle
 build/
+.gradle
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
 
 ### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
+.idea/**/*.xml
 .idea/libraries/
 *.iws
 *.iml
 *.ipr
+*.log
 out/
+!.idea/compiler.xml
+!.idea/gradle.xml
 !**/src/main/**/out/
 !**/src/test/**/out/
 
