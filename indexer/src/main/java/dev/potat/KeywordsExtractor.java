@@ -8,10 +8,12 @@ import java.util.*;
 
 public class KeywordsExtractor {
     private static final double INV_E = 1.0 / Math.E;
+    private static final double TOKENS_REMOVE_WINDOW_FACTOR = 1.2;
 
     // configs
-    private final int maxCount;
     private final float minWeight;
+    private final int maxCount;
+    private final boolean removeFromTail;
     private final Map<String, Float> nerTagsWeights;
     private final Map<String, Float> posPrefixesWeights;
 
@@ -22,11 +24,12 @@ public class KeywordsExtractor {
     public KeywordsExtractor(
             int maxCount,
             float minWeight,
-            Map<String, Float> nerTagsWeights,
+            boolean removeFromTail, Map<String, Float> nerTagsWeights,
             Map<String, Float> posPrefixesWeights
     ) {
         this.maxCount = maxCount;
         this.minWeight = minWeight;
+        this.removeFromTail = removeFromTail;
         this.nerTagsWeights = nerTagsWeights;
         this.posPrefixesWeights = posPrefixesWeights;
 
@@ -66,11 +69,22 @@ public class KeywordsExtractor {
             if (weight >= minWeight) {
                 result.put(keyword, weight);
             }
+        }
 
-            // TODO: filter by maxCount:
-            // tokensToRemove = len(keywords) - maxCount
-            // get (tokensToRemove * 1.2) at the end of the list
-            // and remove the tokensToRemove tokens with the lowest weight
+        // tokensToRemove = len(keywords) - maxCount
+        // get (tokensToRemove * 1.2) at the end of the list
+        // and remove the tokensToRemove tokens with the lowest weight
+
+        int tokensToRemove = result.size() - maxCount;
+        int tokensRemoveWindow = (int) (tokensToRemove * TOKENS_REMOVE_WINDOW_FACTOR);
+        List<Map.Entry<String, Float>> entries = new ArrayList<>(result.entrySet());
+        if (removeFromTail) {
+            entries = entries.subList(Math.max(result.size() - tokensRemoveWindow, 0), result.size());
+        }
+
+        entries.sort(Map.Entry.comparingByValue());
+        for (int i = 0; i < tokensToRemove; i++) {
+            result.remove(entries.get(i).getKey());
         }
 
         return result;
@@ -110,8 +124,10 @@ public class KeywordsExtractor {
     }
 
     public static class Builder {
-        private int maxCount = 10;
-        private float minWeight = 1;
+        private float minWeight = 2.0f;
+        private int maxCount = 32;
+        private boolean removeFromTail = false;
+
         private Map<String, Float> nerTagsWeights = Map.of(
                 "PERSON", 1.0f,
                 "LOCATION", 1.0f,
@@ -123,13 +139,18 @@ public class KeywordsExtractor {
                 "JJ", 1.0f
         );
 
+        public Builder minWeight(float minWeight) {
+            this.minWeight = minWeight;
+            return this;
+        }
+
         public Builder maxCount(int maxCount) {
             this.maxCount = maxCount;
             return this;
         }
 
-        public Builder minWeight(float minWeight) {
-            this.minWeight = minWeight;
+        public Builder removeFromTail(boolean removeFromTail) {
+            this.removeFromTail = removeFromTail;
             return this;
         }
 
@@ -144,7 +165,7 @@ public class KeywordsExtractor {
         }
 
         public KeywordsExtractor build() {
-            return new KeywordsExtractor(maxCount, minWeight, nerTagsWeights, posPrefixesWeights);
+            return new KeywordsExtractor(maxCount, minWeight, removeFromTail, nerTagsWeights, posPrefixesWeights);
         }
     }
 

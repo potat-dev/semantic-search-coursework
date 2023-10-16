@@ -22,6 +22,9 @@ public class KeywordsExtractorExample {
                 .build();
 
         LinkedHashMap<String, Float> keywords = extractor.extract(document.text());
-        System.out.println(keywords);
+
+        // System.out.println(keywords);
+        System.out.println(keywords.keySet());
+        System.out.println("Count: " + keywords.size());
     }
 }
