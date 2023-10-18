@@ -3,91 +3,96 @@ package dev.potat;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.util.Timing;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.RequiredArgsConstructor;
 
 import java.util.*;
 
+@Builder
+@AllArgsConstructor
+@RequiredArgsConstructor
 public class KeywordsExtractor {
-    private static final double INV_E = 1.0 / Math.E;
     private static final double TOKENS_REMOVE_WINDOW_FACTOR = 1.2;
 
     // configs
-    private final float minWeight;
-    private final int maxCount;
-    private final boolean removeFromTail;
-    private final Map<String, Float> nerTagsWeights;
-    private final Map<String, Float> posPrefixesWeights;
+    @Builder.Default
+    private final float minWeight = 2.0f;
+
+    @Builder.Default
+    private final int maxCount = 32;
+
+    @Builder.Default
+    private final boolean removeFromTail = false;
+
+    @Builder.Default
+    private final Map<String, Float> nerTagsWeights = Map.of(
+            "PERSON", 1.0f,
+            "LOCATION", 1.0f,
+            "ORGANIZATION", 1.0f,
+            "MISC", 1.0f
+    );
+
+    @Builder.Default
+    private final Map<String, Float> posPrefixesWeights = Map.of(
+            "NN", 1.0f,
+            "JJ", 1.0f
+    );
 
     // pipeline
     StanfordCoreNLP pipeline;
 
-
-    public KeywordsExtractor(
-            int maxCount,
-            float minWeight,
-            boolean removeFromTail, Map<String, Float> nerTagsWeights,
-            Map<String, Float> posPrefixesWeights
-    ) {
-        this.maxCount = maxCount;
-        this.minWeight = minWeight;
-        this.removeFromTail = removeFromTail;
-        this.nerTagsWeights = nerTagsWeights;
-        this.posPrefixesWeights = posPrefixesWeights;
-
-        // build pipeline
-        Properties props = new Properties();
-        props.setProperty("annotators", "tokenize,pos,lemma,ner");
-        props.setProperty("ner.applyFineGrained", "false");
-        props.setProperty("ner.model",
-                DefaultPaths.DEFAULT_NER_THREECLASS_MODEL + ',' + DefaultPaths.DEFAULT_NER_CONLL_MODEL);
-
-        this.pipeline = new StanfordCoreNLP(props);
-    }
-
-    public LinkedHashMap<String, Float> extract(String text) {
+    public Keywords extractKeywords(String text) {
         System.out.println("Extracting keywords from text...");
-        LinkedHashMap<String, KeywordInfo> keywords = new LinkedHashMap<>();
+        Keywords keywords = new Keywords();
+
+        // TODO: add ability to init Keywords with a list of starting keywords
+        // they will be determined from the "helper string" (e.g. title)
 
         Timing timer = new Timing();
+
         CoreDocument document = pipeline.processToCoreDocument(text);
         for (CoreLabel tok : document.tokens()) {
-            KeywordInfo info = keywords.get(tok.lemma());
-            if (info == null) {
+            String keyword = tok.lemma();
+            if (!keywords.increment(keyword)) {
                 float weight = calculateTokenWeight(tok);
-                info = new KeywordInfo(1, weight);
-                keywords.put(tok.lemma(), info);
-            } else {
-                info.incrementCount();
+                if (weight == 0.0f) continue;
+                keywords.add(keyword, weight, tok.tag(), tok.ner());
             }
         }
 
         System.out.println("Time elapsed: " + timer.toSecondsString());
 
-        LinkedHashMap<String, Float> result = new LinkedHashMap<>();
-        for (Map.Entry<String, KeywordInfo> entry : keywords.entrySet()) {
-            String keyword = entry.getKey();
-            float weight = entry.getValue().balancedWeight();
-            if (weight >= minWeight) {
-                result.put(keyword, weight);
-            }
-        }
+        // TODO: rewrite this to use the new Keywords class
+        // maybe move to Keywords class
+
+        // LinkedHashMap<String, Float> result = new LinkedHashMap<>();
+        // for (Map.Entry<String, Keywords.KeywordInfo> entry : keywords.entrySet()) {
+        //     String keyword = entry.getKey();
+        //     float weight = entry.getValue().balancedWeight();
+        //     if (weight >= minWeight) {
+        //         result.put(keyword, weight);
+        //     }
+        // }
 
         // tokensToRemove = len(keywords) - maxCount
         // get (tokensToRemove * 1.2) at the end of the list
         // and remove the tokensToRemove tokens with the lowest weight
 
-        int tokensToRemove = result.size() - maxCount;
-        int tokensRemoveWindow = (int) (tokensToRemove * TOKENS_REMOVE_WINDOW_FACTOR);
-        List<Map.Entry<String, Float>> entries = new ArrayList<>(result.entrySet());
-        if (removeFromTail) {
-            entries = entries.subList(Math.max(result.size() - tokensRemoveWindow, 0), result.size());
-        }
+        // int tokensToRemove = result.size() - maxCount;
+        // int tokensRemoveWindow = (int) (tokensToRemove * TOKENS_REMOVE_WINDOW_FACTOR);
+        // List<Map.Entry<String, Float>> entries = new ArrayList<>(result.entrySet());
+        // if (removeFromTail) {
+        //     entries = entries.subList(Math.max(result.size() - tokensRemoveWindow, 0), result.size());
+        // }
+        //
+        // entries.sort(Map.Entry.comparingByValue());
+        // for (int i = 0; i < tokensToRemove; i++) {
+        //     result.remove(entries.get(i).getKey());
+        // }
 
-        entries.sort(Map.Entry.comparingByValue());
-        for (int i = 0; i < tokensToRemove; i++) {
-            result.remove(entries.get(i).getKey());
-        }
-
-        return result;
+        // return result;
+        return keywords;
     }
 
     private float calculateTokenWeight(CoreLabel tok) {
@@ -103,73 +108,5 @@ public class KeywordsExtractor {
             }
         }
         return weight;
-    }
-
-    public static class KeywordInfo {
-        private int count;
-        private final float weight;
-
-        public KeywordInfo(int count, float weight) {
-            this.count = count;
-            this.weight = weight;
-        }
-
-        public void incrementCount() {
-            count++;
-        }
-
-        public float balancedWeight() {
-            return weight * (float) Math.pow(count, INV_E);
-        }
-    }
-
-    public static class Builder {
-        private float minWeight = 2.0f;
-        private int maxCount = 32;
-        private boolean removeFromTail = false;
-
-        private Map<String, Float> nerTagsWeights = Map.of(
-                "PERSON", 1.0f,
-                "LOCATION", 1.0f,
-                "ORGANIZATION", 1.0f,
-                "MISC", 1.0f
-        );
-        private Map<String, Float> posPrefixesWeights = Map.of(
-                "NN", 1.0f,
-                "JJ", 1.0f
-        );
-
-        public Builder minWeight(float minWeight) {
-            this.minWeight = minWeight;
-            return this;
-        }
-
-        public Builder maxCount(int maxCount) {
-            this.maxCount = maxCount;
-            return this;
-        }
-
-        public Builder removeFromTail(boolean removeFromTail) {
-            this.removeFromTail = removeFromTail;
-            return this;
-        }
-
-        public Builder nerTagsWeights(Map<String, Float> nerTagsWeights) {
-            this.nerTagsWeights = nerTagsWeights;
-            return this;
-        }
-
-        public Builder posPrefixesWeights(Map<String, Float> posPrefixesWeights) {
-            this.posPrefixesWeights = posPrefixesWeights;
-            return this;
-        }
-
-        public KeywordsExtractor build() {
-            return new KeywordsExtractor(maxCount, minWeight, removeFromTail, nerTagsWeights, posPrefixesWeights);
-        }
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 }

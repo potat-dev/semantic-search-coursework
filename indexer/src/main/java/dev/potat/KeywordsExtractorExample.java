@@ -4,8 +4,13 @@ import dev.langchain4j.data.document.Document;
 import dev.langchain4j.data.document.DocumentType;
 import dev.langchain4j.data.document.UrlDocumentLoader;
 import dev.langchain4j.data.document.transformer.HtmlTextExtractor;
+import edu.stanford.nlp.pipeline.AnnotationPipeline;
+import edu.stanford.nlp.pipeline.DefaultPaths;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
 import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Properties;
 
 public class KeywordsExtractorExample {
     public static void main(String[] args) {
@@ -16,15 +21,16 @@ public class KeywordsExtractorExample {
         HtmlTextExtractor textExtractor = new HtmlTextExtractor();
         Document document = textExtractor.transform(UrlDocumentLoader.load(url, DocumentType.HTML));
 
+        StanfordCoreNLP pipeline = Pipeline.getPipeline();
         KeywordsExtractor extractor = KeywordsExtractor.builder()
-                .maxCount(32)
-                .minWeight(2.0f)
+                .pipeline(pipeline)
                 .build();
 
-        LinkedHashMap<String, Float> keywords = extractor.extract(document.text());
-
         // System.out.println(keywords);
-        System.out.println(keywords.keySet());
+        Keywords keywords = extractor.extractKeywords(document.text());
+        for (Map.Entry<String, Keywords.KeywordInfo> keyword: keywords.entrySet()) {
+            System.out.println(keyword.getKey() + "\t " + keyword.getValue());
+        }
         System.out.println("Count: " + keywords.size());
     }
 }
