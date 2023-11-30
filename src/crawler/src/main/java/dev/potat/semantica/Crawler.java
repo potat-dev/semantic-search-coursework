@@ -11,9 +11,9 @@ public class Crawler {
 
     public static void main(String[] args) {
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
-        factory.setUsername("test");
-        factory.setPassword("test");
+        factory.setHost(System.getenv("RABBITMQ_HOST"));
+        factory.setUsername(System.getenv("RABBITMQ_USERNAME"));
+        factory.setPassword(System.getenv("RABBITMQ_PASSWORD"));
 
         try (Connection connection = factory.newConnection();
              Channel channel = connection.createChannel()) {
