@@ -9,9 +9,10 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/api" />
-            <option value="$PROJECT_DIR$/crawler" />
-            <option value="$PROJECT_DIR$/indexer" />
+            <option value="$PROJECT_DIR$/common" />
+            <option value="$PROJECT_DIR$/modules" />
+            <option value="$PROJECT_DIR$/modules/crawler" />
+            <option value="$PROJECT_DIR$/modules/indexer" />
           </set>
         </option>
       </GradleProjectSettings>

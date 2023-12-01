@@ -44,4 +44,4 @@ bin/
 .DS_Store
 
 ### Secrets ###
-.env
+modules/crawler/.env

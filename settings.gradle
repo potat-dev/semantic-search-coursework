@@ -1,4 +1,5 @@
 rootProject.name = 'semantica'
 
-include 'src:common'
-include 'src:api', 'src:crawler', 'src:indexer'
+include 'common'
+include 'modules:crawler'
+include 'modules:indexer'
