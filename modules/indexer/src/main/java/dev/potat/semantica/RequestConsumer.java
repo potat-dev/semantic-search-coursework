@@ -1,6 +1,5 @@
 package dev.potat.semantica;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
@@ -8,6 +7,8 @@ import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 import dev.potat.semantica.common.CrawlRequest;
 import dev.potat.semantica.common.MongoWrapper;
+import dev.potat.semantica.common.keywords.Keywords;
+import dev.potat.semantica.common.keywords.KeywordsExtractor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -22,11 +23,13 @@ import java.util.concurrent.ThreadLocalRandom;
 public class RequestConsumer extends DefaultConsumer {
     MongoWrapper db;
     Channel channel;
+    KeywordsExtractor keywordsExtractor;
 
-    public RequestConsumer(Channel channel, MongoWrapper mongo) {
+    public RequestConsumer(Channel channel, MongoWrapper mongo, KeywordsExtractor keywordsExtractor) {
         super(channel);
         this.channel = channel;
         this.db = mongo;
+        this.keywordsExtractor = keywordsExtractor;
     }
 
     @Override
@@ -39,10 +42,18 @@ public class RequestConsumer extends DefaultConsumer {
             System.out.println("Crawling: " + request);
 
             // process request
+            URL rootUrl;
             db.saveLinkToDB(request.getUrl());
+            try {
+                rootUrl = new URL(request.getUrl());
+                System.out.println("Domain name: " + rootUrl.getHost());
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Could not process url: " + request.getUrl());
+                return;
+            }
+
             Document document = Jsoup.connect(request.getUrl()).get();
-            URL rootUrl = new URL(request.getUrl());
-            System.out.println(rootUrl.getHost());
 //            String webpage = document.html();
 //            System.out.println(webpage);
 
@@ -70,9 +81,21 @@ public class RequestConsumer extends DefaultConsumer {
                     channel.basicPublish("", Worker.QUEUE_NAME, null,
                             objectMapper.writeValueAsBytes(newRequest));
                 }
+            } else {
+                System.out.println("Max recursion depth reached. Indexing, but not crawling next");
             }
 
+            Elements textElements = document.select(request.getTextSelector());
+            StringBuilder stringBuilder = new StringBuilder();
+            for (Element e : textElements) {
+                stringBuilder.append(e.text()).append("\n\n");
+            }
+
+            Keywords keywords = keywordsExtractor.extractKeywords(stringBuilder.toString());
+            db.saveKeywordsForURL(request.getUrl(), keywords.simpleFilter(1, 24));
+
             Thread.sleep(ThreadLocalRandom.current().nextInt(100, 200));
+            db.setReady(request.getUrl());
         } catch (InterruptedException | IOException e) {
             throw new RuntimeException(e);
         }

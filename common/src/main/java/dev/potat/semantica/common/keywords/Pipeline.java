@@ -1,4 +1,4 @@
-package dev.potat.semantica;
+package dev.potat.semantica.common.keywords;
 
 import edu.stanford.nlp.pipeline.DefaultPaths;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;

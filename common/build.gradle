@@ -15,6 +15,11 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
     implementation 'org.mongodb:mongodb-driver-sync:4.11.1'
+
+    // stanford-corenlp
+    implementation 'edu.stanford.nlp:stanford-corenlp:4.5.5'
+    implementation "edu.stanford.nlp:stanford-corenlp:4.5.5:models"
+    implementation "edu.stanford.nlp:stanford-corenlp:4.5.5:models-english"
 }
 
 test {

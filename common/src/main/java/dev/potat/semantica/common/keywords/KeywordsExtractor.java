@@ -1,4 +1,4 @@
-package dev.potat.semantica;
+package dev.potat.semantica.common.keywords;
 
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.pipeline.*;

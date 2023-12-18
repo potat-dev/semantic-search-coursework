@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.*;
 import dev.potat.semantica.common.IndexingRequest;
 import dev.potat.semantica.common.MongoWrapper;
+import dev.potat.semantica.common.keywords.KeywordsExtractor;
+import dev.potat.semantica.common.keywords.Pipeline;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ThreadLocalRandom;
@@ -14,6 +16,8 @@ public class Worker {
 
     public static void main(String[] args) {
         MongoWrapper mongo = MongoWrapper.getInstance(System.getenv("MONGODB_URI"));
+        KeywordsExtractor keywordsExtractor = KeywordsExtractor.builder().pipeline(Pipeline.getPipeline()).build();
+
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(System.getenv("RABBITMQ_HOST"));
         factory.setUsername(System.getenv("RABBITMQ_USERNAME"));
@@ -21,7 +25,7 @@ public class Worker {
 
         try (Connection connection = factory.newConnection(); Channel channel = connection.createChannel()) {
             channel.queueDeclare(QUEUE_NAME, true, false, false, null);
-            Consumer consumer = new RequestConsumer(channel, mongo);
+            Consumer consumer = new RequestConsumer(channel, mongo, keywordsExtractor);
             channel.basicConsume(QUEUE_NAME, true, consumer);
             System.out.println("Connected");
 

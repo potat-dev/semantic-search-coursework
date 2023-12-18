@@ -1,18 +1,18 @@
-package dev.potat.semantica;
+package dev.potat.semantica.common.keywords;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @ToString
 @NoArgsConstructor
 public class Keywords {
-    private static final double INV_E = 1.0 / Math.E;
-
     private final HashMap<String, KeywordInfo> keywords = new LinkedHashMap<>();
 
     public Keywords(Keywords keywords) {
@@ -25,6 +25,10 @@ public class Keywords {
 
     public void add(String keyword, float weight, String pos, String ner) {
         keywords.put(keyword, new KeywordInfo(keyword, weight, pos, ner));
+    }
+
+    public void add(String keyword, KeywordInfo info) {
+        keywords.put(keyword, info);
     }
 
     public boolean contains(String keyword) {
@@ -66,21 +70,53 @@ public class Keywords {
         return keywords.size();
     }
 
-    public Keywords filter(int maxCount, int minCount, float minWeight) {
-        // filtering steps:
-        // 1. create new keywords map
-        // 2. put exactly maxCount keywords with the highest weights into the new map
-        // 3. remove keywords with weight < minWeight but only until the new map size >= minCount
-        // 4. return new Keywords object
+//    public Keywords filter(int maxCount, int minCount, float minWeight) {
+    // filtering steps:
+    // 1. create new keywords map
+    // 2. put exactly maxCount keywords with the highest weights into the new map
+    // 3. remove keywords with weight < minWeight but only until the new map size >= minCount
+    // 4. return new Keywords object
 
-//        Map<String, Float> sortedKeywords = getSimpleMap().entrySet().stream()
-//                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-//                .collect(Collectors.toMap(
-//                        Map.Entry::getKey,
-//                        Map.Entry::getValue
-//                ));
+//        Keywords result = new Keywords();
+    // LinkedHashMap<String, KeywordInfo> sorted = entrySet().stream().sorted(
+    //         Map.Entry.comparingByValue(
+    //                 Comparator.comparing(KeywordInfo::weight)
+    //         )
+    // ).collect(
+    //         LinkedHashMap::new,
+    //         (map, entry) -> map.put(entry.getKey(), entry.getValue()),
+    //         Map::putAll
+    // );
+//    }
 
-        return null;
+    public Keywords simpleFilter(float minWeight, int maxCount) {
+        HashMap<String, KeywordInfo> collected = keywords.entrySet().stream()
+                .filter(entry -> entry.getValue().weight() >= minWeight)
+                .sorted(Map.Entry.comparingByValue(Comparator.comparing(KeywordInfo::weight).reversed()))
+                .limit(maxCount)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, HashMap::new));
+
+        Keywords result = new Keywords();
+        for (Map.Entry<String, KeywordInfo> k : collected.entrySet()) {
+                result.add(k.getKey(), k.getValue());
+        }
+        return result;
+    }
+
+    public List<String> getStrKeywords() {
+        List<String> result = new ArrayList<>();
+        for (Map.Entry<String, KeywordInfo> k : keywords.entrySet()) {
+            result.add(k.getKey());
+        }
+        return result;
+    }
+
+    public List<Float> getKeywordsWeights() {
+        List<Float> result = new ArrayList<>();
+        for (Map.Entry<String, KeywordInfo> k : keywords.entrySet()) {
+            result.add(k.getValue().weight());
+        }
+        return result;
     }
 
     public record Keyword(String token, float weight) {
@@ -102,7 +138,7 @@ public class Keywords {
         }
 
         public float weight() {
-            return tokenWeight * (float) Math.pow(INV_E, count);
+            return tokenWeight * (float) Math.log(count);
         }
 
         public Keyword toKeyword() {
