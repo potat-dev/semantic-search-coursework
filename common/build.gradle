@@ -20,6 +20,10 @@ dependencies {
     implementation 'edu.stanford.nlp:stanford-corenlp:4.5.5'
     implementation "edu.stanford.nlp:stanford-corenlp:4.5.5:models"
     implementation "edu.stanford.nlp:stanford-corenlp:4.5.5:models-english"
+
+    // milvus
+    implementation 'io.milvus:milvus-sdk-java:2.3.2'
+
 }
 
 test {
