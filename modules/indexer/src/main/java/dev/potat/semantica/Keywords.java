@@ -41,26 +41,26 @@ public class Keywords {
         return keywords.entrySet();
     }
 
-    public Map<String, Float> getSimpleMap() {
-        // extract keywords and their balanced weights from the keywords map
-        return keywords.entrySet().stream().collect(
-                Collectors.toMap(
-                        Map.Entry::getKey,
-                        e -> e.getValue().balancedWeight()
-                )
-        );
-    }
+//    public Map<String, Float> getSimpleMap() {
+//        // extract keywords and their balanced weights from the keywords map
+//        return keywords.entrySet().stream().collect(
+//                Collectors.toMap(
+//                        Map.Entry::getKey,
+//                        e -> e.getValue().balancedWeight()
+//                )
+//        );
+//    }
 
-    public Map<String, Float> getMostImportant(int count) {
-        // get exactly count keywords with the highest balanced weights
-        return getSimpleMap().entrySet().stream()
-                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-                .limit(count)
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue
-                ));
-    }
+//    public Map<String, Float> getMostImportant(int count) {
+//        // get exactly count keywords with the highest balanced weights
+//        return getSimpleMap().entrySet().stream()
+//                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+//                .limit(count)
+//                .collect(Collectors.toMap(
+//                        Map.Entry::getKey,
+//                        Map.Entry::getValue
+//                ));
+//    }
 
     public int size() {
         return keywords.size();
@@ -73,12 +73,12 @@ public class Keywords {
         // 3. remove keywords with weight < minWeight but only until the new map size >= minCount
         // 4. return new Keywords object
 
-        Map<String, Float> sortedKeywords = getSimpleMap().entrySet().stream()
-                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue
-                ));
+//        Map<String, Float> sortedKeywords = getSimpleMap().entrySet().stream()
+//                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+//                .collect(Collectors.toMap(
+//                        Map.Entry::getKey,
+//                        Map.Entry::getValue
+//                ));
 
         return null;
     }

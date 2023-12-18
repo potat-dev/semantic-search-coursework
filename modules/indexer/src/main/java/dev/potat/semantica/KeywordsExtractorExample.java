@@ -29,20 +29,20 @@ public class KeywordsExtractorExample {
 
         // System.out.println(keywords);
         Keywords keywords = extractor.extractKeywords(document.text());
-        for (Map.Entry<String, Keywords.KeywordInfo> keyword : keywords.entrySet()) {
-            System.out.println(keyword.getKey() + "\t " + keyword.getValue().balancedWeight());
-        }
+//        for (Map.Entry<String, Keywords.KeywordInfo> keyword : keywords.entrySet()) {
+//            System.out.println(keyword.getKey() + "\t " + keyword.getValue().balancedWeight());
+//        }
         System.out.println("Count: " + keywords.size());
 
-        Map<String, Float> mostImportant = keywords.getMostImportant(32);
+//        Map<String, Float> mostImportant = keywords.getMostImportant(32);
 
 
 
         System.out.println();
         System.out.println("Most important:");
-        for (Map.Entry<String, Float> keyword : mostImportant.entrySet()) {
-            System.out.println(keyword.getKey() + "\t " + keyword.getValue());
-        }
+//        for (Map.Entry<String, Float> keyword : mostImportant.entrySet()) {
+//            System.out.println(keyword.getKey() + "\t " + keyword.getValue());
+//        }
 
         HashMap<String, String> test = new HashMap<>();
         test.put("foo", "bar");

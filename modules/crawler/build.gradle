@@ -11,7 +11,7 @@ repositories {
 }
 
 application {
-    mainClass = 'dev.potat.semantica.crawler.Crawler'
+    mainClass = 'dev.potat.semantica.crawler.CrawlWorker'
 }
 
 dependencies {
@@ -22,6 +22,7 @@ dependencies {
 
     implementation 'com.rabbitmq:amqp-client:5.20.0'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.0'
+    implementation 'org.jsoup:jsoup:1.17.1'
 }
 
 test {
