@@ -1,4 +1,4 @@
-package dev.potat.semantica;
+package dev.potat.semantica.indexer;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -10,6 +10,7 @@ import dev.potat.semantica.common.embeddings.EmbeddingsExtractor;
 import dev.potat.semantica.common.embeddings.MilvusWrapper;
 import dev.potat.semantica.common.keywords.KeywordsExtractor;
 import dev.potat.semantica.common.keywords.Pipeline;
+import dev.potat.semantica.indexer.RequestConsumer;
 
 public class Worker {
     public static final String QUEUE_NAME = "CRAWL_TASKS";

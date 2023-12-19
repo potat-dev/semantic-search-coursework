@@ -1,4 +1,4 @@
-package dev.potat.semantica;
+package dev.potat.semantica.indexer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.AMQP;
@@ -13,7 +13,6 @@ import dev.potat.semantica.common.embeddings.EmbeddingsExtractor;
 import dev.potat.semantica.common.embeddings.MilvusWrapper;
 import dev.potat.semantica.common.keywords.Keywords;
 import dev.potat.semantica.common.keywords.KeywordsExtractor;
-import org.apache.regexp.RE;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
