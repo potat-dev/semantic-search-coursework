@@ -5,7 +5,7 @@ import java.util.List;
 public class EmbeddingsTest {
     public static void main(String[] args) {
         EmbeddingsExtractor extractor = EmbeddingsExtractor.getInstance("/code/projects/semantica/model/model.onnx");
-        List<Float> embedding = extractor.extract("java");
+        List<Float> embedding = extractor.extract("java async library");
         System.out.println(embedding);
         System.out.println(embedding.size());
     }

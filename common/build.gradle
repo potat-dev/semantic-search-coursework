@@ -24,6 +24,10 @@ dependencies {
     // milvus
     implementation 'io.milvus:milvus-sdk-java:2.3.2'
 
+    // langchain4j
+    implementation 'dev.langchain4j:langchain4j:0.23.0'
+    implementation 'dev.langchain4j:langchain4j-open-ai:0.23.0'
+    implementation 'dev.langchain4j:langchain4j-embeddings:0.23.0'
 }
 
 test {

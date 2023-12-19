@@ -15,6 +15,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Updates.set;
 
 public class MongoWrapper {
@@ -74,6 +75,21 @@ public class MongoWrapper {
         } catch (MongoException me) {
             System.err.println("Unable to insert due to an error: " + me);
         }
+    }
+
+    public boolean checkLinkExists(String url) {
+        try {
+            // Inserts a sample document describing a movie into the collection
+            Document doc = linksCollection.find(eq("url", url))
+//                    .projection(projectionFields)
+//                    .sort(Sorts.descending("imdb.rating"))
+                    .first();
+            return (doc != null);
+            // Prints a message if any exceptions occur during the operation
+        } catch (MongoException me) {
+            System.err.println("Error: " + me);
+        }
+        return false;
     }
 
     public void saveKeywordsForURL(String url, Keywords keywords) {

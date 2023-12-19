@@ -133,10 +133,29 @@ public class MilvusWrapper {
         }
     }
 
-    public void insertEmbeddings(String url, List<Float> vector) {
+    public void insertEmbedding(String url, List<Float> vector) {
         List<InsertParam.Field> fieldsInsert = new ArrayList<>();
         fieldsInsert.add(new InsertParam.Field("url", Collections.singletonList(url)));
         fieldsInsert.add(new InsertParam.Field("vector", Collections.singletonList(vector)));
+
+        InsertParam param = InsertParam.newBuilder()
+                .withCollectionName(COLLECTION_NAME)
+                .withFields(fieldsInsert)
+                .build();
+
+        R<MutationResult> response = client.insert(param);
+        if (response.getStatus() != R.Status.Success.getCode()) {
+            System.out.println(response.getMessage());
+        }
+    }
+
+    public void insertEmbeddings(String url, List<List<Float>> vectors) {
+        if (vectors.size() == 0) return;
+
+        List<InsertParam.Field> fieldsInsert = new ArrayList<>();
+        List<String> urls = Collections.nCopies(vectors.size(), url);
+        fieldsInsert.add(new InsertParam.Field("url", urls));
+        fieldsInsert.add(new InsertParam.Field("vector", vectors));
 
         InsertParam param = InsertParam.newBuilder()
                 .withCollectionName(COLLECTION_NAME)

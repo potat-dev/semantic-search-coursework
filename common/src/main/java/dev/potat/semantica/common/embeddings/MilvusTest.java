@@ -6,11 +6,11 @@ public class MilvusTest {
     public static void main(String[] args) {
         MilvusWrapper milvus = MilvusWrapper.getInstance("192.168.1.40", 19530);
         System.out.println(milvus.listCollections());
-//        milvus.insertEmbeddings("test", generateVector());
-//        milvus.insertEmbeddings("test1dfs", generateVector());
-//        milvus.insertEmbeddings("testdfsd", generateVector());
-//        milvus.insertEmbeddings("tes423t", generateVector());
-//        milvus.insertEmbeddings("tes65756432t", generateVector());
+//        milvus.insertEmbedding("test", generateVector());
+//        milvus.insertEmbedding("test1dfs", generateVector());
+//        milvus.insertEmbedding("testdfsd", generateVector());
+//        milvus.insertEmbedding("tes423t", generateVector());
+//        milvus.insertEmbedding("tes65756432t", generateVector());
 //
         milvus.search(generateVector());
 //        milvus.query("446407842836266657");
