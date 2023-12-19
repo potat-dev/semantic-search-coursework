@@ -2,4 +2,4 @@ rootProject.name = 'semantica'
 
 include 'common'
 include 'indexer'
-include 'api'
+include 'search'

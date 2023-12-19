@@ -40,7 +40,8 @@ public class KeywordsExtractor {
     );
 
     // pipeline
-    StanfordCoreNLP pipeline;
+    @Builder.Default
+    StanfordCoreNLP pipeline = Pipeline.getPipeline();
 
     public Keywords extractKeywords(String text) {
         System.out.println("Extracting keywords from text...");
