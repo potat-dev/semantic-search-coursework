@@ -104,6 +104,7 @@ public class SearchService {
                         .url(request.queryParams("url"))
                         .textSelector(request.queryParams("text_selector"))
                         .maxDepth(Integer.valueOf(request.queryParams("max_depth")))
+                        .currentDepth(0)
                         .build();
                 channel.basicPublish("", QUEUE_NAME, null,
                         objectMapper.writeValueAsBytes(indexingRequest));
