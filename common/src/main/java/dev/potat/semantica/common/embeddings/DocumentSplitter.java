@@ -9,6 +9,7 @@ import lombok.Builder;
 import org.checkerframework.checker.signature.qual.BinaryName;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class DocumentSplitter {
@@ -27,6 +28,10 @@ public class DocumentSplitter {
     }
 
     public List<String> split(String text) {
+        if (text.isEmpty() || text.isBlank()) {
+            return Collections.emptyList();
+        }
+
         Document doc = Document.from(text);
         List<String> segments = new ArrayList<>();
         for (TextSegment segment : splitter.split(doc)) {
