@@ -98,7 +98,7 @@ public class Keywords {
 
         Keywords result = new Keywords();
         for (Map.Entry<String, KeywordInfo> k : collected.entrySet()) {
-                result.add(k.getKey(), k.getValue());
+            result.add(k.getKey(), k.getValue());
         }
         return result;
     }
@@ -115,6 +115,14 @@ public class Keywords {
         List<Float> result = new ArrayList<>();
         for (Map.Entry<String, KeywordInfo> k : keywords.entrySet()) {
             result.add(k.getValue().weight());
+        }
+        return result;
+    }
+
+    public List<Float> getKeywordsWeights(float addN) {
+        List<Float> result = new ArrayList<>();
+        for (Map.Entry<String, KeywordInfo> k : keywords.entrySet()) {
+            result.add(k.getValue().weight() + addN);
         }
         return result;
     }

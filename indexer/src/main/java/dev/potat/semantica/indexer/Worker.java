@@ -4,13 +4,12 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.Consumer;
-import dev.potat.semantica.common.MongoWrapper;
+import dev.potat.semantica.common.keywords.MongoWrapper;
 import dev.potat.semantica.common.embeddings.DocumentSplitter;
 import dev.potat.semantica.common.embeddings.EmbeddingsExtractor;
 import dev.potat.semantica.common.embeddings.MilvusWrapper;
 import dev.potat.semantica.common.keywords.KeywordsExtractor;
 import dev.potat.semantica.common.keywords.Pipeline;
-import dev.potat.semantica.indexer.RequestConsumer;
 
 public class Worker {
     public static final String QUEUE_NAME = "CRAWL_TASKS";

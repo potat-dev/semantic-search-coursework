@@ -1,22 +1,22 @@
-package dev.potat.semantica.common;
+package dev.potat.semantica.common.keywords;
 
 import com.mongodb.MongoException;
 import com.mongodb.client.*;
 import com.mongodb.client.model.*;
 import com.mongodb.client.result.InsertOneResult;
 import com.mongodb.client.result.UpdateResult;
-import dev.potat.semantica.common.keywords.Keywords;
+import dev.potat.semantica.common.dataclasses.SearchResult;
 import org.bson.Document;
 import lombok.Synchronized;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
-import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Updates.set;
+import static com.mongodb.client.model.Aggregates.*;
+import static com.mongodb.client.model.Filters.*;
 
 public class MongoWrapper {
 
@@ -51,7 +51,7 @@ public class MongoWrapper {
         ArrayList<String> existingLinks = new ArrayList<>();
         linksCollection.aggregate(
                 Arrays.asList(
-                        Aggregates.match(Filters.in("url", links)),
+                        match(Filters.in("url", links)),
                         Aggregates.project(Projections.include("url"))
                 )
         ).forEach(document -> existingLinks.add(document.getString("url")));
@@ -95,8 +95,8 @@ public class MongoWrapper {
     public void saveKeywordsForURL(String url, Keywords keywords) {
         Document query = new Document().append("url", url);
         Bson updates = Updates.combine(
-                set("keywords", keywords.getStrKeywords()),
-                set("weights", keywords.getKeywordsWeights())
+                Updates.set("keywords", keywords.getStrKeywords()),
+                Updates.set("weights", keywords.getKeywordsWeights())
         );
         UpdateOptions options = new UpdateOptions().upsert(false);
         try {
@@ -114,12 +114,10 @@ public class MongoWrapper {
 
     public void setReady(String url) {
         Document query = new Document().append("url", url);
-        Bson updates = set("ready", true);
+        Bson updates = Updates.set("ready", Boolean.TRUE);
         UpdateOptions options = new UpdateOptions().upsert(false);
         try {
-            // Updates the first document that has a "title" value of "Cool Runnings 2"
             UpdateResult result = linksCollection.updateOne(query, updates, options);
-            // Prints the number of updated documents and the upserted document ID, if an upsert was performed
             System.out.println("Modified document count: " + result.getModifiedCount());
             System.out.println("Upserted id: " + result.getUpsertedId());
 
@@ -127,5 +125,42 @@ public class MongoWrapper {
         } catch (MongoException me) {
             System.err.println("Unable to update due to an error: " + me);
         }
+    }
+
+    public List<SearchResult> searchByKeywords(List<String> keywords, List<Float> weights) {
+        List<SearchResult> results = new ArrayList<>();
+
+        linksCollection.aggregate(
+                Arrays.asList(
+                        new Document("$addFields",
+                                new Document("matchedTags",
+                                        new Document("$setIntersection", Arrays.asList("$keywords", keywords)))),
+                        new Document("$match",
+                                new Document("matchedTags",
+                                        new Document("$ne", Arrays.asList()))),
+                        new Document("$addFields",
+                                new Document("weightedSum",
+                                        new Document("$reduce",
+                                                new Document("input", "$matchedTags")
+                                                        .append("initialValue", 0L)
+                                                        .append("in",
+                                                                new Document("$add", Arrays.asList("$$value",
+                                                                        new Document("$pow", Arrays.asList(new Document("$arrayElemAt", Arrays.asList("$weights",
+//                                                                        new Document("$multiply", Arrays.asList(new Document("$arrayElemAt", Arrays.asList("$weights",
+                                                                                        new Document("$indexOfArray", Arrays.asList("$keywords", "$$this")))),
+                                                                                new Document("$arrayElemAt", Arrays.asList(weights,
+                                                                                        new Document("$indexOfArray", Arrays.asList(keywords, "$$this")))))))))))),
+                        new Document("$sort",
+                                new Document("weightedSum", -1L)),
+                        new Document("$limit", 20L))
+
+        // process results
+        ).forEach(doc -> results.add(
+                SearchResult.builder()
+                        .url(doc.getString("url"))
+                        .score(doc.getDouble("weightedSum").floatValue())
+                        .build()
+        ));
+        return results;
     }
 }

@@ -1,9 +1,14 @@
 plugins {
     id 'java'
+    id 'application'
 }
 
 group = 'dev.potat.semantica'
 version = 'unspecified'
+
+application {
+    mainClass = 'dev.potat.semantica.search.SearchService'
+}
 
 repositories {
     mavenCentral()

@@ -1,4 +1,4 @@
-package dev.potat.semantica.common;
+package dev.potat.semantica.common.dataclasses;
 
 import lombok.Data;
 
