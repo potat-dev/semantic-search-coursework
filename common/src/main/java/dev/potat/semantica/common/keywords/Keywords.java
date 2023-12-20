@@ -146,7 +146,7 @@ public class Keywords {
         }
 
         public float weight() {
-            return tokenWeight * (float) Math.log(count);
+            return tokenWeight * ((float) Math.log(count) + 1.0f);
         }
 
         public Keyword toKeyword() {

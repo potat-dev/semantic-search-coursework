@@ -1,5 +1,6 @@
 package dev.potat.semantica.common.embeddings;
 
+import dev.potat.semantica.common.dataclasses.SearchResult;
 import io.milvus.client.MilvusClient;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.common.clientenum.ConsistencyLevelEnum;
@@ -18,9 +19,7 @@ import io.milvus.param.highlevel.collection.response.ListCollectionsResponse;
 import io.milvus.param.index.CreateIndexParam;
 import io.milvus.response.SearchResultsWrapper;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class MilvusWrapper {
     private static final String COLLECTION_NAME = "links";
@@ -168,11 +167,14 @@ public class MilvusWrapper {
         }
     }
 
-    public void search(List<Float> vector) {
+    public List<SearchResult> search(List<Float> vector) {
+        List<SearchResult> results = new ArrayList<>();
+        HashMap<String, Float> urls = new HashMap<>();
+
         SearchParam param = SearchParam.newBuilder()
                 .withCollectionName(COLLECTION_NAME)
                 .withMetricType(MetricType.L2)
-                .withTopK(10)
+                .withTopK(20)
                 .withVectors(Collections.singletonList(vector))
                 .addOutField("url")
                 .withVectorFieldName("vector")
@@ -187,7 +189,24 @@ public class MilvusWrapper {
         System.out.println("Search results:");
         List<SearchResultsWrapper.IDScore> scores = wrapper.getIDScore(0);
         for (SearchResultsWrapper.IDScore score : scores) {
-            System.out.println(score);
+            String url = (String) score.get("url");
+            if (urls.containsKey(url)) {
+                urls.put(url, urls.get(url) + 1.0f);
+            } else {
+                urls.put(url, 1.0f);
+            }
+            System.out.println(score.getScore() + " - " + score.get("url"));
         }
+
+        for (Map.Entry<String, Float> url : urls.entrySet()) {
+            results.add(
+                    SearchResult.builder()
+                            .url(url.getKey())
+                            .score((float) Math.log(url.getValue()) + 1.0f)
+                            .build()
+            );
+        }
+
+        return results;
     }
 }

@@ -1,5 +1,7 @@
 package dev.potat.semantica.common.embeddings;
 
+import dev.potat.semantica.common.dataclasses.SearchResult;
+
 import java.util.*;
 
 public class MilvusTest {
@@ -12,7 +14,10 @@ public class MilvusTest {
 //        milvus.insertEmbedding("tes423t", generateVector());
 //        milvus.insertEmbedding("tes65756432t", generateVector());
 //
-        milvus.search(generateVector());
+        List<SearchResult> results = milvus.search(generateVector());
+        for (SearchResult result : results) {
+            System.out.println(result);
+        }
 //        milvus.query("446407842836266657");
     }
 
