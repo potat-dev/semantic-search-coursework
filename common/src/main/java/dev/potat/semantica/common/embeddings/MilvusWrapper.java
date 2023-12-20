@@ -195,7 +195,7 @@ public class MilvusWrapper {
             } else {
                 urls.put(url, 1.0f);
             }
-            System.out.println(score.getScore() + " - " + score.get("url"));
+//            System.out.println(score.getScore() + " - " + score.get("url"));
         }
 
         for (Map.Entry<String, Float> url : urls.entrySet()) {
