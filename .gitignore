@@ -45,3 +45,6 @@ bin/
 
 ### Secrets ###
 modules/crawler/.env
+
+### Models ###
+*.onnx

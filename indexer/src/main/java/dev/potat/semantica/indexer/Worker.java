@@ -23,7 +23,7 @@ public class Worker {
 
         KeywordsExtractor keywordsExtractor = KeywordsExtractor.builder().pipeline(Pipeline.getPipeline()).build();
         DocumentSplitter documentSplitter = new DocumentSplitter();
-        EmbeddingsExtractor embeddingsExtractor = EmbeddingsExtractor.getInstance("/code/projects/semantica/model/model.onnx");
+        EmbeddingsExtractor embeddingsExtractor = EmbeddingsExtractor.getInstance(System.getenv("MODEL_PATH"));
 
 
         ConnectionFactory factory = new ConnectionFactory();

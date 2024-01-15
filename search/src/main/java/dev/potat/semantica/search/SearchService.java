@@ -18,18 +18,17 @@ import java.util.List;
 
 import static spark.Spark.*;
 
-
 public class SearchService {
     private static final KeywordsExtractor keywordsExtractor = KeywordsExtractor.builder().build();
-    private static final EmbeddingsExtractor embeddingsExtractor = EmbeddingsExtractor.getInstance("/code/projects/semantica/model/model.onnx");
+    private static final EmbeddingsExtractor embeddingsExtractor = EmbeddingsExtractor
+            .getInstance(System.getenv("MODEL_PATH"));
 
     private static final ConnectionFactory rabbit = new ConnectionFactory();
     public static final String QUEUE_NAME = "CRAWL_TASKS";
     private static final MongoWrapper mongo = MongoWrapper.getInstance(System.getenv("MONGODB_URI"));
     private static final MilvusWrapper milvus = MilvusWrapper.getInstance(
             System.getenv("MILVUS_HOST"),
-            Integer.parseInt(System.getenv("MILVUS_PORT"))
-    );
+            Integer.parseInt(System.getenv("MILVUS_PORT")));
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
